@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark only">
+<title>FaltWerk &ndash; Vorlagen f&uuml;r Buchfaltkunst</title>
+<link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%2312141a"/><g fill="%23f4f1e8"><rect x="12" y="14" width="6" height="36"/><rect x="21" y="14" width="6" height="28"/><rect x="30" y="14" width="6" height="20"/><rect x="39" y="14" width="6" height="28"/><rect x="48" y="14" width="4" height="36"/></g></svg>'>
+<meta name="theme-color" content="#12141a">
+<style>
+:root{
+  --ink:#12141a; --panel:#1a1d25; --panel2:#22262f; --line:#2e3442;
+  --paper:#f4f1e8; --tx:#e7e9ef; --mut:#99a1b3;
+  --acc:#8fb8c9; --acc2:#e2a03f; --bad:#e07a6a;
+  --disp:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--ink);color:var(--tx);font-family:var(--body);font-size:15px;line-height:1.5}
+a{color:var(--acc)}
+h1,h2{font-family:var(--disp);font-weight:600;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 80px}
+header.top{border-bottom:1px solid var(--line);background:linear-gradient(180deg,#181b23,#12141a);padding:22px 16px 18px}
+header.top .in{max-width:1180px;margin:0 auto;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.logo{display:flex;align-items:flex-end;gap:3px;height:38px}
+.logo i{display:block;width:5px;background:var(--paper);border-radius:1px}
+h1{font-size:26px}
+h1 small{display:block;font-family:var(--body);font-size:12.5px;color:var(--mut);letter-spacing:.6px;text-transform:uppercase;font-weight:500;margin-top:3px}
+.grid{display:grid;grid-template-columns:346px 1fr;gap:20px;margin-top:22px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card+.card{margin-top:16px}
+.card h2{font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2 span.n{font-family:var(--mono);font-size:11px;color:var(--acc);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+label{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
+input[type=text],input[type=number],select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);
+  color:var(--tx);border-radius:8px;padding:8px 10px;font-family:var(--body);font-size:14px}
+input[type=number]{font-family:var(--mono)}
+textarea{resize:vertical;min-height:56px}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+input[type=range]{width:100%;accent-color:var(--acc);margin:2px 0}
+input[type=file]{font-size:13px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.chk{display:flex;align-items:center;gap:8px;margin:9px 0;font-size:13.5px}
+.chk input{accent-color:var(--acc);width:16px;height:16px}
+.chk label{margin:0;color:var(--tx);font-size:13.5px}
+button{font-family:var(--body);font-size:14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--tx);padding:9px 14px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.pri{background:var(--acc);color:#0e1117;border-color:var(--acc);font-weight:600}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;flex:1;background:transparent;padding:8px 6px;font-size:13px;color:var(--mut)}
+.seg button[aria-pressed=true]{background:var(--panel2);color:var(--tx);box-shadow:inset 0 -2px 0 var(--acc)}
+.ctrlrow{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:start}
+@media(max-width:620px){.ctrlrow{grid-template-columns:1fr}}
+#preview{display:block;background:#0d0f14;border:1px solid var(--line);border-radius:8px}
+#sil{background:var(--paper);border-radius:8px;border:1px solid var(--line);display:block;width:100%;height:auto;image-rendering:pixelated}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:10px}
+.legend b{color:var(--tx);font-family:var(--mono);font-weight:500}
+.note{font-size:12.5px;color:var(--mut);margin-top:8px}
+.warn{border-left:3px solid var(--acc2);background:#241f16;color:#f0d9b0;padding:9px 11px;border-radius:0 8px 8px 0;font-size:13px;margin-top:10px}
+.warn.err{border-color:var(--bad);background:#2a1a17;color:#f3c6bd}
+.warn.inf{border-color:var(--acc);background:#16212a;color:#cfe4ee}
+table.tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px}
+table.tbl th,table.tbl td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:right}
+table.tbl th:first-child,table.tbl td:first-child{text-align:left;color:var(--acc)}
+table.tbl thead th{color:var(--mut);font-weight:500;position:sticky;top:0;background:var(--panel)}
+.tblwrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:10px}
+details.help{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--panel);margin-top:16px}
+details.help summary{cursor:pointer;font-family:var(--disp);font-size:16px}
+details.help li{margin:6px 0;font-size:14px}
+footer.imp{margin-top:28px;border-top:1px solid var(--line);padding-top:16px;font-size:12.5px;color:var(--mut)}
+footer.imp b{color:var(--tx)}
+.pp-btn{display:inline-block;background:#ffc439;color:#111;font-weight:700;border-radius:999px;padding:8px 16px;text-decoration:none;font-size:13px;margin-top:10px}
+#printArea{display:none}
+.pp-page{page-break-after:always;break-after:page;color:#000;background:#fff;font-family:var(--body)}
+.pp-page:last-child{page-break-after:auto;break-after:auto}
+.pp-head{font-size:9pt;border-bottom:.4mm solid #000;padding-bottom:1.5mm;margin-bottom:2mm;display:flex;justify-content:space-between;gap:6mm}
+.pp-head b{font-family:var(--disp)}
+.pp-ruler{position:relative;height:5mm;margin-left:13mm;border-bottom:.3mm solid #000}
+.pp-ruler i{position:absolute;bottom:0;width:.25mm;height:2mm;background:#000}
+.pp-ruler i.maj{height:4mm;width:.35mm}
+.pp-ruler u{position:absolute;bottom:4.2mm;font-size:6pt;text-decoration:none;transform:translateX(-50%);font-family:var(--mono)}
+.pp-row{display:flex;align-items:center}
+.pp-num{width:13mm;font-family:var(--mono);font-size:7.5pt;text-align:right;padding-right:2mm;flex:none}
+.pp-num.r{text-align:left;padding:0 0 0 2mm}
+.pp-track{position:relative;flex:none;border-bottom:.15mm solid #b9b9b9;overflow:hidden}
+.pp-bar{position:absolute;bottom:0;background:#000;display:block}
+.pp-tick{position:absolute;bottom:0;width:.4mm;background:#000;display:block}
+.tbl-print{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:8pt;color:#000}
+.tbl-print th,.tbl-print td{border:.15mm solid #666;padding:.7mm 1.4mm;text-align:right}
+.tbl-print th{background:#eee}
+.tbl-cols{column-count:3;column-gap:6mm}
+@media print{ body{background:#fff} body>*{display:none !important} #printArea{display:block !important} }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="in">
+    <div class="logo" aria-hidden="true">
+      <i style="height:20px"></i><i style="height:32px"></i><i style="height:38px"></i><i style="height:26px"></i><i style="height:14px"></i>
+    </div>
+    <h1>FaltWerk<small>Vorlagen-Generator f&uuml;r Buchfaltkunst &middot; Mess-Falt-Technik</small></h1>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2><span class="n">1</span> Motiv</h2>
+      <div class="seg" role="group">
+        <button id="mText" aria-pressed="true">Text / Symbol</button>
+        <button id="mImg" aria-pressed="false">Bild</button>
+      </div>
+
+      <div id="paneText">
+        <label for="txt">Text (Zeilenumbruch erlaubt)</label>
+        <textarea id="txt">&hearts;</textarea>
+        <div class="row2">
+          <div><label for="font">Schrift</label>
+            <select id="font"><option value="serif">Serif</option><option value="sans-serif">Sans</option>
+            <option value="monospace">Mono</option><option value="cursive">Cursive</option><option value="fantasy">Fantasy</option></select></div>
+          <div><label for="weight">Schnitt</label>
+            <select id="weight"><option value="bold">Fett</option><option value="normal">Normal</option><option value="900">Extrafett</option></select></div>
+        </div>
+        <p class="note">Symbole gehen auch: &hearts; &starf; &#9834; &#10004; &#9822; &#9992;</p>
+      </div>
+
+      <div id="paneImg" style="display:none">
+        <label for="file">Bild w&auml;hlen</label>
+        <input type="file" id="file" accept="image/*">
+        <label for="hel">Helligkeit <span id="helV">0</span></label>
+        <input type="range" id="hel" min="-100" max="100" value="0">
+        <label for="kon">Kontrast <span id="konV">1,0</span>&times;</label>
+        <input type="range" id="kon" min="20" max="400" value="100">
+        <div class="chk"><input type="checkbox" id="auto" checked><label for="auto">Schwelle automatisch (Otsu)</label></div>
+        <label for="thr">Schwelle manuell <span id="thrV">128</span></label>
+        <input type="range" id="thr" min="5" max="250" value="128">
+        <div class="chk"><input type="checkbox" id="inv"><label for="inv">Hell/Dunkel tauschen</label></div>
+        <div class="chk"><input type="checkbox" id="bgrm"><label for="bgrm">Hintergrund am Rand entfernen</label></div>
+        <label for="clean">Flecken &amp; L&ouml;cher aufr&auml;umen</label>
+        <select id="clean"><option value="0">Aus</option><option value="1" selected>Leicht</option>
+          <option value="2">Mittel</option><option value="3">Stark</option></select>
+      </div>
+
+      <label for="fit">Passform im Buch</label>
+      <select id="fit">
+        <option value="contain" selected>Proportional &ndash; unverzerrt</option>
+        <option value="stretch">Strecken &ndash; verzerrt, f&uuml;llt die Seite</option>
+        <option value="coverh">H&ouml;he f&uuml;llen &ndash; Seiten beschneiden</option>
+      </select>
+      <div class="row2">
+        <div><label for="scl">Motivgr&ouml;&szlig;e (%)</label><input type="number" id="scl" value="100" step="5" min="20" max="300"></div>
+        <div><label for="pos">Position</label>
+          <select id="pos"><option value="mid" selected>Mitte</option><option value="top">Oben</option><option value="bot">Unten</option></select></div>
+      </div>
+      <div class="chk"><input type="checkbox" id="mirror"><label for="mirror">Horizontal spiegeln</label></div>
+      <div class="chk"><input type="checkbox" id="flip"><label for="flip">Vertikal spiegeln</label></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">2</span> Buch</h2>
+      <div class="row2">
+        <div><label for="ph">Seitenh&ouml;he (cm)</label><input type="number" id="ph" value="20" step="0.1" min="8" max="25.5"></div>
+        <div><label for="bt">Buchdicke (cm)</label><input type="number" id="bt" value="3.5" step="0.1" min="0.5"></div>
+      </div>
+      <div class="row2">
+        <div><label for="mt">Rand oben (cm)</label><input type="number" id="mt" value="1.5" step="0.1" min="0"></div>
+        <div><label for="mb">Rand unten (cm)</label><input type="number" id="mb" value="1.5" step="0.1" min="0"></div>
+      </div>
+      <div class="row3">
+        <div><label for="sp">Startseite</label><input type="number" id="sp" value="101" step="1" min="1"></div>
+        <div><label for="st">Schritt</label><input type="number" id="st" value="2" step="1" min="1" max="4"></div>
+        <div><label for="fo">Faltungen</label><input type="number" id="fo" value="180" step="1" min="10" max="600"></div>
+      </div>
+      <p class="note">Eine Faltung = ein Blatt = zwei Seitenzahlen &rarr; Schritt 2. Portraits brauchen viele Faltungen: unter ca.&nbsp;150 wird ein Gesicht grob.</p>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">3</span> Feinschliff &amp; Ausgabe</h2>
+      <div class="row2">
+        <div><label for="ms">Min. Faltl&auml;nge (mm)</label><input type="number" id="ms" value="4" step="0.5" min="1"></div>
+        <div><label for="mg">Min. Abstand (mm)</label><input type="number" id="mg" value="4" step="0.5" min="1"></div>
+      </div>
+      <div class="row2">
+        <div><label for="rh">Zeilenh&ouml;he Druck (mm)</label><input type="number" id="rh" value="4.5" step="0.5" min="2.5" max="10"></div>
+        <div><label for="mk">Markierung</label><select id="mk"><option value="bar">Balken</option><option value="tick">Striche</option></select></div>
+      </div>
+      <div class="btns">
+        <button class="pri" id="btnPat">Druckvorlage drucken</button>
+        <button id="btnTab">Ma&szlig;tabelle drucken</button>
+        <button id="btnCsv">CSV speichern</button>
+      </div>
+      <div class="btns">
+        <button id="btnSave">Einstellungen sichern</button>
+        <button id="btnReset">Zur&uuml;cksetzen</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2><span class="n">4</span> Kontrolle</h2>
+      <div class="ctrlrow">
+        <div>
+          <label style="margin-top:0">Motiv, wie es erkannt wurde</label>
+          <canvas id="sil" width="300" height="300"></canvas>
+          <p class="note">Nur was hier schwarz ist, wird gefaltet.</p>
+        </div>
+        <div>
+          <label style="margin-top:0">Fertiges Buch, ma&szlig;st&auml;blich</label>
+          <canvas id="preview"></canvas>
+          <p class="note" id="scaleNote">&nbsp;</p>
+        </div>
+      </div>
+      <div class="legend">
+        <span>Faltungen <b id="sFolds">0</b></span>
+        <span>Seiten <b id="sPages">&ndash;</b></span>
+        <span>Bl&auml;tter mit Falz <b id="sUsed">0</b></span>
+        <span>max. Marken <b id="sMax">0</b></span>
+        <span>Motiv <b id="sSize">&ndash;</b></span>
+      </div>
+      <div id="warns"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">5</span> Ma&szlig;tabelle</h2>
+      <p class="note">Werte in cm ab <b>Oberkante</b> der Buchseite. Zwischen Marke&nbsp;1&rarr;2 (und 3&rarr;4 &hellip;) wird gefaltet.</p>
+      <div class="tblwrap"><table class="tbl" id="tbl"><thead></thead><tbody></tbody></table></div>
+    </div>
+
+    <details class="help">
+      <summary>Portraits: was funktioniert und was nicht</summary>
+      <ul>
+        <li><b>Die Buchdicke ist der Flaschenhals.</b> Ein 3,5&nbsp;cm dickes Buch mit 17&nbsp;cm nutzbarer H&ouml;he hat ein Verh&auml;ltnis von 1:4,9. Ein hochformatiges Portrait wird darin zwangsl&auml;ufig horizontal gestaucht &ndash; das ist bei Buchfaltkunst normal und sieht am fertigen Buch aus leichtem Winkel richtig aus.</li>
+        <li><b>Vorher freistellen lohnt sich.</b> Ein Foto mit Hintergrund, Hauttönen und Haaren l&auml;sst sich kaum sauber in Schwarz/Wei&szlig; trennen. Am besten das Portrait vorher als reine Silhouette oder 2-Ton-Grafik anlegen und die als PNG hochladen.</li>
+        <li><b>Kein Halbton.</b> Falten kennt nur zwei Zust&auml;nde. Graustufen, Schatten und Verl&auml;ufe gehen verloren &ndash; erkennbar bleibt nur, was auch als reine Kontur funktioniert.</li>
+        <li><b>Genug Faltungen.</b> Jede Faltung ist ein Bildpunkt in der Breite. 100 Faltungen = 100 Pixel breit. F&uuml;r Gesichter eher 250&ndash;400 einplanen.</li>
+      </ul>
+    </details>
+
+    <details class="help">
+      <summary>So faltest du damit</summary>
+      <ol>
+        <li><b>Buch w&auml;hlen:</b> Hardcover, nicht glattes Papier. Bl&auml;tter z&auml;hlen &ndash; die Zahl der Faltungen muss ins Buch passen.</li>
+        <li><b>Startseite festlegen:</b> Vorne ein paar Bl&auml;tter frei lassen, gleich viele hinten.</li>
+        <li><b>Druck pr&uuml;fen:</b> Ohne Skalierung drucken (100&nbsp;%, &bdquo;Tats&auml;chliche Gr&ouml;&szlig;e&ldquo;) und das Lineal oben mit einem echten Lineal gegenpr&uuml;fen.</li>
+        <li><b>Markieren:</b> Nulllinie der Vorlage an die Oberkante der Buchseite legen, Anfang und Ende jedes Balkens anzeichnen.</li>
+        <li><b>Falten:</b> Ecke nach innen falten, Faltkante genau zwischen die beiden Marken, Papierkante b&uuml;ndig am Buchr&uuml;cken. Falzbein hilft.</li>
+      </ol>
+    </details>
+
+    <footer class="imp">
+      <b>Impressum</b><br>
+      Alexander Scherer &middot; Mertensstra&szlig;e 18 &middot; 13587 Berlin<br>
+      E&#8209;Mail: <a href="mailto:info@alexander-scherer.com">info@alexander-scherer.com</a><br>
+      Kleingewerbe Fotograf &middot; Kleinunternehmer gem&auml;&szlig; &sect;19 UStG &ndash; keine Ausweisung der Umsatzsteuer.<br>
+      Verantwortlich f&uuml;r den Inhalt: Alexander Scherer, Anschrift wie oben.
+      <br><a class="pp-btn" href="https://paypal.me/AlexanderGlauche" target="_blank" rel="noopener">Projekt unterst&uuml;tzen &ndash; PayPal</a>
+    </footer>
+  </div>
+</div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+'use strict';
+
+var S = {
+  mode:'text', text:'\u2665', font:'serif', weight:'bold',
+  hel:0, kon:100, auto:true, thr:128, inv:false, bgrm:false, clean:1,
+  fit:'contain', scl:100, pos:'mid', mirror:false, flip:false,
+  ph:20, bt:3.5, mt:1.5, mb:1.5, sp:101, st:2, fo:180,
+  ms:4, mg:4, rh:4.5, mk:'bar'
+};
+var imgEl = null, RESULT = [], SRC_AR = 1, MOTIF = {w:0,h:0};
+var RES = 900, SS = 3, MAXPX = 900;
+
+function $(id){ return document.getElementById(id); }
+function num(v,d){ var n = parseFloat(v); return isFinite(n) ? n : d; }
+function fmt(v){ return v.toFixed(1).replace('.', ','); }
+function round1(v){ return Math.round(v*10)/10; }
+
+/* ================= Motiv -> binaere Maske ================= */
+function otsu(h){
+  var total=0, sum=0, i;
+  for (i=0;i<256;i++){ total+=h[i]; sum+=i*h[i]; }
+  var sumB=0, wB=0, best=-1, thr=128;
+  for (i=0;i<256;i++){
+    wB += h[i]; if (!wB) continue;
+    var wF = total-wB; if (!wF) break;
+    sumB += i*h[i];
+    var mB = sumB/wB, mF = (sum-sumB)/wF;
+    var v = wB*wF*(mB-mF)*(mB-mF);
+    if (v > best){ best = v; thr = i; }
+  }
+  return thr;
+}
+
+// liefert {m:Uint8Array(1=Tinte), w, h} oder null
+function sourceMask(){
+  if (S.mode === 'image' && imgEl) return imageMask();
+  return textMask();
+}
+
+function textMask(){
+  var c = document.createElement('canvas'); c.width = 2400; c.height = 1400;
+  var g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0,0,c.width,c.height);
+  g.fillStyle = '#000'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  var lines = String(S.text||'').split('\n').filter(function(l){ return l.length>0; });
+  if (!lines.length) lines = ['?'];
+  var size = 900/Math.max(1,lines.length);
+  g.font = S.weight + ' ' + size + 'px ' + S.font;
+  var wMax = 0, k;
+  for (k=0;k<lines.length;k++) wMax = Math.max(wMax, g.measureText(lines[k]).width);
+  if (wMax > 2200){ size = size*2200/wMax; g.font = S.weight + ' ' + size + 'px ' + S.font; }
+  var lh = size*1.05, y0 = c.height/2 - (lines.length-1)*lh/2;
+  for (k=0;k<lines.length;k++) g.fillText(lines[k], c.width/2, y0 + k*lh);
+  var d = g.getImageData(0,0,c.width,c.height).data;
+  var m = new Uint8Array(c.width*c.height);
+  for (var i=0;i<m.length;i++) m[i] = d[i*4] < 128 ? 1 : 0;
+  return { m:m, w:c.width, h:c.height };
+}
+
+function imageMask(){
+  var sc = Math.min(1, MAXPX/Math.max(imgEl.width, imgEl.height));
+  var W = Math.max(2, Math.round(imgEl.width*sc));
+  var H = Math.max(2, Math.round(imgEl.height*sc));
+  var c = document.createElement('canvas'); c.width = W; c.height = H;
+  var g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0,0,W,H);
+  g.drawImage(imgEl, 0, 0, W, H);
+  var p = g.getImageData(0,0,W,H).data;
+
+  var gray = new Uint8Array(W*H), hist = new Uint32Array(256);
+  var kon = S.kon/100, hel = S.hel;
+  for (var i=0;i<gray.length;i++){
+    var v = 0.299*p[i*4] + 0.587*p[i*4+1] + 0.114*p[i*4+2];
+    v = (v-128)*kon + 128 + hel;
+    v = v < 0 ? 0 : (v > 255 ? 255 : v);
+    gray[i] = v|0; hist[gray[i]]++;
+  }
+  var t = S.auto ? otsu(hist) : S.thr;
+  var m = new Uint8Array(W*H);
+  for (i=0;i<m.length;i++){
+    var dark = gray[i] <= t;
+    m[i] = (S.inv ? !dark : dark) ? 1 : 0;
+  }
+  if (S.bgrm) removeBorder(m, W, H);
+  return { m:m, w:W, h:H };
+}
+
+// Tinte, die den Bildrand beruehrt, entfernen (Hintergrund)
+function removeBorder(m, W, H){
+  var stack = new Int32Array(W*H), sp = 0, x, y;
+  function push(i){ if (m[i]===1){ m[i]=0; stack[sp++]=i; } }
+  for (x=0;x<W;x++){ push(x); push((H-1)*W+x); }
+  for (y=0;y<H;y++){ push(y*W); push(y*W+W-1); }
+  while (sp>0){
+    var i = stack[--sp], cx = i%W, cy = (i/W)|0;
+    if (cx>0)   push(i-1);
+    if (cx<W-1) push(i+1);
+    if (cy>0)   push(i-W);
+    if (cy<H-1) push(i+W);
+  }
+}
+
+function cropMask(src){
+  var W = src.w, H = src.h, m = src.m;
+  var minX=W, minY=H, maxX=-1, maxY=-1, x, y;
+  for (y=0;y<H;y++) for (x=0;x<W;x++) if (m[y*W+x]){
+    if (x<minX) minX=x; if (x>maxX) maxX=x;
+    if (y<minY) minY=y; if (y>maxY) maxY=y;
+  }
+  if (maxX < 0) return null;
+  var w = maxX-minX+1, h = maxY-minY+1;
+  var c = document.createElement('canvas'); c.width=w; c.height=h;
+  var g = c.getContext('2d');
+  var img = g.createImageData(w,h), d = img.data;
+  for (y=0;y<h;y++) for (x=0;x<w;x++){
+    var v = m[(y+minY)*W + (x+minX)] ? 0 : 255, o = (y*w+x)*4;
+    d[o]=d[o+1]=d[o+2]=v; d[o+3]=255;
+  }
+  g.putImageData(img,0,0);
+  return c;
+}
+
+/* ================= Raster -> Faltmarken ================= */
+function majority(grid, F, R){
+  var out = new Uint8Array(grid.length), f, y;
+  for (f=0;f<F;f++) for (y=0;y<R;y++){
+    var n = 0;
+    for (var df=-1;df<=1;df++) for (var dy=-1;dy<=1;dy++){
+      var ff = f+df, yy = y+dy;
+      if (ff<0) ff=0; if (ff>=F) ff=F-1;
+      if (yy<0) yy=0; if (yy>=R) yy=R-1;
+      n += grid[ff*R+yy];
+    }
+    out[f*R+y] = n >= 5 ? 1 : 0;
+  }
+  return out;
+}
+
+function dropSmall(grid, F, R, minArea, target){
+  var seen = new Uint8Array(grid.length);
+  var stack = new Int32Array(grid.length);
+  var comp = new Int32Array(grid.length);
+  for (var s=0;s<grid.length;s++){
+    if (seen[s] || grid[s] !== target) continue;
+    var sp = 0, n = 0;
+    stack[sp++] = s; seen[s] = 1;
+    while (sp>0){
+      var i = stack[--sp]; comp[n++] = i;
+      var f = (i/R)|0, y = i%R;
+      if (f>0   && !seen[i-R] && grid[i-R]===target){ seen[i-R]=1; stack[sp++]=i-R; }
+      if (f<F-1 && !seen[i+R] && grid[i+R]===target){ seen[i+R]=1; stack[sp++]=i+R; }
+      if (y>0   && !seen[i-1] && grid[i-1]===target){ seen[i-1]=1; stack[sp++]=i-1; }
+      if (y<R-1 && !seen[i+1] && grid[i+1]===target){ seen[i+1]=1; stack[sp++]=i+1; }
+    }
+    if (n < minArea) for (var k=0;k<n;k++) grid[comp[k]] = target ? 0 : 1;
+  }
+}
+
+function compute(){
+  RESULT = [];
+  var usable = S.ph - S.mt - S.mb;
+  if (usable <= 1 || S.fo < 2) return;
+
+  var src = sourceMask();
+  var cv  = src ? cropMask(src) : null;
+  drawSil(cv);
+  if (!cv) return;
+  SRC_AR = cv.width/cv.height;
+
+  var F = S.fo, W = F*SS;
+  var c = document.createElement('canvas'); c.width = W; c.height = RES;
+  var g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0,0,W,RES);
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+
+  var boxW = S.bt, boxH = usable, dwCm, dhCm;
+  if (S.fit === 'contain'){
+    if (SRC_AR > boxW/boxH){ dwCm = boxW; dhCm = boxW/SRC_AR; }
+    else { dhCm = boxH; dwCm = boxH*SRC_AR; }
+  } else if (S.fit === 'coverh'){
+    dhCm = boxH; dwCm = boxH*SRC_AR;
+  } else { dwCm = boxW; dhCm = boxH; }
+
+  var k = S.scl/100;
+  dwCm *= k; dhCm *= k;
+  MOTIF = { w:dwCm, h:dhCm };
+
+  var dw = dwCm*(W/boxW), dh = dhCm*(RES/boxH);
+  var dx = (W-dw)/2;
+  var posEff = S.pos;
+  if (S.flip){ if (posEff === 'top') posEff = 'bot'; else if (posEff === 'bot') posEff = 'top'; }
+  var dy = posEff === 'top' ? 0 : (posEff === 'bot' ? RES-dh : (RES-dh)/2);
+  g.save();
+  g.translate(S.mirror ? W : 0, S.flip ? RES : 0);
+  g.scale(S.mirror ? -1 : 1, S.flip ? -1 : 1);
+  g.drawImage(cv, dx, dy, dw, dh);
+  g.restore();
+
+  var data = g.getImageData(0,0,W,RES).data;
+  var grid = new Uint8Array(F*RES), f, y, s;
+  for (f=0;f<F;f++) for (y=0;y<RES;y++){
+    var hit = 0;
+    for (s=0;s<SS;s++) if (data[(y*W + f*SS + s)*4] < 128) hit++;
+    grid[f*RES+y] = hit*2 >= SS ? 1 : 0;
+  }
+
+  if (S.mode === 'image' && S.clean > 0){
+    var lvl = S.clean;
+    for (var it=0; it<lvl; it++) grid = majority(grid, F, RES);
+    var minArea = Math.round([0, 0.0015, 0.004, 0.01][lvl] * F * RES);
+    dropSmall(grid, F, RES, minArea, 1);
+    dropSmall(grid, F, RES, minArea, 0);
+  }
+
+  var minSegCm = S.ms/10, minGapCm = S.mg/10;
+  for (f=0;f<F;f++){
+    var segs = [], start = -1;
+    for (y=0;y<RES;y++){
+      var on = grid[f*RES+y] === 1;
+      if (on && start < 0) start = y;
+      if ((!on || y === RES-1) && start >= 0){ segs.push([start, on ? y : y-1]); start = -1; }
+    }
+    var cm = segs.map(function(p){
+      return [ S.mt + (p[0]/RES)*usable, S.mt + ((p[1]+1)/RES)*usable ];
+    });
+    var merged = [];
+    for (var i=0;i<cm.length;i++){
+      if (merged.length && cm[i][0] - merged[merged.length-1][1] < minGapCm)
+        merged[merged.length-1][1] = cm[i][1];
+      else merged.push([cm[i][0], cm[i][1]]);
+    }
+    var out = merged.filter(function(p){ return (p[1]-p[0]) >= minSegCm; })
+                    .map(function(p){ return [round1(p[0]), round1(p[1])]; })
+                    .filter(function(p){ return p[1] > p[0]; });
+    RESULT.push({ page: S.sp + f*S.st, segs: out });
+  }
+}
+
+/* ================= Zeichnen ================= */
+function drawSil(cv){
+  var el = $('sil'), g = el.getContext('2d');
+  el.width = 300; el.height = 300;
+  g.fillStyle = '#f4f1e8'; g.fillRect(0,0,300,300);
+  if (!cv){
+    g.fillStyle = '#9a9384'; g.font = '13px system-ui'; g.textAlign = 'center';
+    g.fillText('kein Motiv erkannt', 150, 150);
+    return;
+  }
+  var sc = Math.min(288/cv.width, 288/cv.height);
+  var w = cv.width*sc, h = cv.height*sc;
+  g.imageSmoothingEnabled = false;
+  g.drawImage(cv, (300-w)/2, (300-h)/2, w, h);
+}
+
+// Ma&szlig;stabsgetreu: 1 cm quer = 1 cm hoch. Das Buch ist schmal, das ist korrekt.
+function draw(){
+  var cv = $('preview'), g = cv.getContext('2d');
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  var pxcm = Math.min(520/S.ph, 230/S.bt);      // passt in Hoehe UND Breite
+  var rul = 24, pad = 8;
+  var bw = S.bt*pxcm, bh = S.ph*pxcm;
+  var w = Math.round(rul + bw + pad), h = Math.round(bh + pad*2);
+  cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,w,h);
+
+  var x0 = rul, y0 = pad;
+  g.fillStyle = '#fffdf6'; g.fillRect(x0, y0, bw, bh);
+
+  g.setLineDash([3,3]); g.strokeStyle = '#ddd5c3'; g.lineWidth = 1;
+  [S.mt, S.ph-S.mb].forEach(function(cm){
+    var y = y0 + cm*pxcm;
+    g.beginPath(); g.moveTo(x0, y); g.lineTo(x0+bw, y); g.stroke();
+  });
+  g.setLineDash([]);
+
+  g.fillStyle = '#141414';
+  var n = RESULT.length || 1, colW = bw/n;
+  for (var i=0;i<RESULT.length;i++){
+    var x = x0 + i*colW;
+    for (var j=0;j<RESULT[i].segs.length;j++){
+      var y1 = y0 + RESULT[i].segs[j][0]*pxcm;
+      var y2 = y0 + RESULT[i].segs[j][1]*pxcm;
+      g.fillRect(x, y1, Math.max(colW, 0.5), Math.max(y2-y1, 0.6));
+    }
+  }
+  g.strokeStyle = '#8b93a5'; g.lineWidth = 1;
+  g.strokeRect(x0+.5, y0+.5, bw-1, bh-1);
+
+  g.strokeStyle = '#5b6272'; g.fillStyle = '#99a1b3';
+  g.font = '9px ui-monospace,monospace'; g.textAlign = 'right';
+  for (var cm2=0; cm2<=Math.floor(S.ph); cm2++){
+    var y = y0 + cm2*pxcm, maj = (cm2 % 5 === 0);
+    g.beginPath(); g.moveTo(x0 - (maj?7:4), y); g.lineTo(x0-1, y); g.stroke();
+    if (maj) g.fillText(String(cm2), x0-9, y+3);
+  }
+  $('scaleNote').textContent = 'Buchr\u00fccken ' + fmt(S.bt) + ' cm \u00d7 Seitenh\u00f6he ' + fmt(S.ph)
+    + ' cm \u00b7 ' + Math.round(pxcm) + ' px/cm';
+}
+
+function maxSegs(){ var m=0; for (var i=0;i<RESULT.length;i++) m=Math.max(m,RESULT[i].segs.length); return m; }
+
+function stats(){
+  var used = 0, mx = 0;
+  for (var i=0;i<RESULT.length;i++){ var s = RESULT[i].segs; if (s.length){ used++; mx = Math.max(mx, s.length); } }
+  var usable = S.ph - S.mt - S.mb;
+  var squeeze = S.fit === 'stretch' ? (usable*SRC_AR)/S.bt : 1;
+
+  $('sFolds').textContent = RESULT.length;
+  $('sPages').textContent = RESULT.length ? (RESULT[0].page + '\u2013' + RESULT[RESULT.length-1].page) : '\u2013';
+  $('sUsed').textContent = used;
+  $('sMax').textContent = mx;
+  $('sSize').textContent = RESULT.length ? (fmt(MOTIF.w) + '\u00d7' + fmt(MOTIF.h) + ' cm') : '\u2013';
+
+  var w = [];
+  if (!RESULT.length) w.push(['err','Kein Motiv erkannt. Schwelle, Kontrast oder Hell/Dunkel-Tausch anpassen.']);
+  if (S.ph > 25.5) w.push(['err','Seitenh\u00f6he \u00fcber 25,5 cm passt nicht 1:1 auf A4 quer. Auf A3 drucken.']);
+  if (RESULT.length && S.fit === 'stretch' && squeeze > 1.4)
+    w.push(['inf','Strecken verzerrt das Motiv ' + squeeze.toFixed(1).replace('.',',') + '\u00d7 in die Breite. '
+      + 'Unverzerrt bei voller Seitenh\u00f6he br\u00e4uchte es ein ' + fmt(usable*SRC_AR) + ' cm dickes Buch \u2013 deins hat ' + fmt(S.bt) + ' cm.']);
+  if (RESULT.length && S.fit === 'contain' && MOTIF.h < usable*0.6)
+    w.push(['inf','Das Motiv f\u00fcllt nur ' + Math.round(MOTIF.h/usable*100) + ' % der nutzbaren H\u00f6he \u2013 die Buchdicke begrenzt es. '
+      + 'Gr\u00f6\u00dfer wird es mit einem dickeren Buch, einem querformatigen Motiv oder \u00fcber Motivgr\u00f6\u00dfe \u00fcber 100 %.']);
+  if (RESULT.length && MOTIF.h > usable*1.02)
+    w.push(['','Das Motiv ist h\u00f6her als der nutzbare Bereich und wird oben und unten beschnitten.']);
+  if (S.mode === 'image' && RESULT.length && S.fo < 150)
+    w.push(['','Nur ' + S.fo + ' Faltungen \u2013 das ist die Bildbreite in Pixeln. F\u00fcr Fotos eher 250\u2013400.']);
+  if (mx > 4) w.push(['','Bis zu ' + mx + ' Marken pro Blatt. Aufr\u00e4umen erh\u00f6hen oder Min.-Abstand vergr\u00f6\u00dfern.']);
+  if (RESULT.length && used < RESULT.length*0.5)
+    w.push(['','Mehr als die H\u00e4lfte der Bl\u00e4tter bleibt ungefaltet.']);
+  $('warns').innerHTML = w.map(function(x){
+    return '<div class="warn' + (x[0] ? ' '+x[0] : '') + '">' + x[1] + '</div>';
+  }).join('');
+}
+
+function table(){
+  var m = Math.max(1, maxSegs());
+  var th = '<tr><th>Seite</th>', k;
+  for (k=0;k<m*2;k++) th += '<th>' + (k+1) + '.</th>';
+  th += '</tr>';
+  var rows = '';
+  for (var i=0;i<RESULT.length;i++){
+    var r = RESULT[i], flat = [];
+    for (var j=0;j<r.segs.length;j++){ flat.push(r.segs[j][0]); flat.push(r.segs[j][1]); }
+    rows += '<tr><td>' + r.page + '</td>';
+    for (var c=0;c<m*2;c++) rows += '<td>' + (flat[c] !== undefined ? fmt(flat[c]) : '&ndash;') + '</td>';
+    rows += '</tr>';
+  }
+  $('tbl').tHead.innerHTML = th;
+  $('tbl').tBodies[0].innerHTML = rows;
+}
+
+/* ================= Druck / Export ================= */
+function printPattern(){
+  if (!RESULT.length) return;
+  var mm = S.ph*10, rh = S.rh;
+  var perPage = Math.max(5, Math.floor(176/rh));
+  var pages = Math.ceil(RESULT.length/perPage), html = '', p, i;
+  var ruler = '<div class="pp-ruler" style="width:' + mm + 'mm">';
+  for (i=0;i<=Math.floor(S.ph*2);i++){
+    var pos = i*5, maj = (i%2===0);
+    ruler += '<i class="' + (maj?'maj':'') + '" style="left:' + pos + 'mm"></i>';
+    if (maj) ruler += '<u style="left:' + pos + 'mm">' + (i/2) + '</u>';
+  }
+  ruler += '</div>';
+  for (p=0;p<pages;p++){
+    var head = '<div class="pp-head"><span><b>FaltWerk</b> \u00b7 Mess-Falt-Vorlage</span>' +
+      '<span>Seitenh\u00f6he ' + fmt(S.ph) + ' cm \u00b7 Marken ab Oberkante</span>' +
+      '<span>Blatt ' + (p+1) + '/' + pages + '</span></div>';
+    var rows = '';
+    for (i=p*perPage;i<Math.min(RESULT.length,(p+1)*perPage);i++){
+      var r = RESULT[i], bars = '';
+      for (var j=0;j<r.segs.length;j++){
+        var a = r.segs[j][0]*10, b = r.segs[j][1]*10;
+        if (S.mk === 'tick'){
+          bars += '<i class="pp-tick" style="left:' + a + 'mm;height:' + (rh*0.8) + 'mm"></i>';
+          bars += '<i class="pp-tick" style="left:' + (b-0.4) + 'mm;height:' + (rh*0.8) + 'mm"></i>';
+          bars += '<i class="pp-bar" style="left:' + a + 'mm;width:' + (b-a) + 'mm;height:.2mm"></i>';
+        } else {
+          bars += '<i class="pp-bar" style="left:' + a + 'mm;width:' + (b-a) + 'mm;height:' + (rh*0.72) + 'mm"></i>';
+        }
+      }
+      rows += '<div class="pp-row" style="height:' + rh + 'mm">' +
+        '<span class="pp-num">' + r.page + '</span>' +
+        '<div class="pp-track" style="width:' + mm + 'mm;height:' + rh + 'mm">' + bars + '</div>' +
+        '<span class="pp-num r">' + r.page + '</span></div>';
+    }
+    html += '<div class="pp-page">' + head + ruler + rows + '</div>';
+  }
+  doPrint(html, 'A4 landscape');
+}
+
+function printTable(){
+  if (!RESULT.length) return;
+  var m = Math.max(1, maxSegs()), head = '<tr><th>S.</th>', k;
+  for (k=0;k<m*2;k++) head += '<th>' + (k+1) + '.</th>';
+  head += '</tr>';
+  var chunk = 60, blocks = [], out = '', i;
+  for (i=0;i<RESULT.length;i+=chunk){
+    var rows = '';
+    for (var n=i;n<Math.min(RESULT.length,i+chunk);n++){
+      var r = RESULT[n], flat = [];
+      for (var j=0;j<r.segs.length;j++){ flat.push(r.segs[j][0]); flat.push(r.segs[j][1]); }
+      rows += '<tr><td>' + r.page + '</td>';
+      for (var c=0;c<m*2;c++) rows += '<td>' + (flat[c] !== undefined ? fmt(flat[c]) : '\u2013') + '</td>';
+      rows += '</tr>';
+    }
+    blocks.push('<table class="tbl-print"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table>');
+  }
+  for (i=0;i<blocks.length;i+=3){
+    out += '<div class="pp-page"><div class="pp-head"><span><b>FaltWerk</b> \u00b7 Ma\u00dftabelle (cm ab Oberkante)</span>' +
+      '<span>Seitenh\u00f6he ' + fmt(S.ph) + ' cm</span></div><div class="tbl-cols">' +
+      blocks.slice(i,i+3).join('') + '</div></div>';
+  }
+  doPrint(out, 'A4 portrait');
+}
+
+function doPrint(html, page){
+  var st = document.getElementById('pageStyle');
+  if (!st){ st = document.createElement('style'); st.id = 'pageStyle'; document.head.appendChild(st); }
+  st.textContent = '@page{size:' + page + ';margin:8mm;}';
+  $('printArea').innerHTML = html;
+  window.print();
+}
+
+function csv(){
+  if (!RESULT.length) return;
+  var m = Math.max(1, maxSegs()), head = ['Seite'], k;
+  for (k=0;k<m*2;k++) head.push('Marke' + (k+1));
+  var lines = [head.join(';')];
+  for (var i=0;i<RESULT.length;i++){
+    var r = RESULT[i], flat = [r.page];
+    for (var j=0;j<r.segs.length;j++){ flat.push(fmt(r.segs[j][0])); flat.push(fmt(r.segs[j][1])); }
+    while (flat.length < m*2+1) flat.push('');
+    lines.push(flat.join(';'));
+  }
+  var blob = new Blob(['\ufeff' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'faltvorlage.csv';
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+}
+
+/* ================= Bindung ================= */
+function read(){
+  S.text = $('txt').value; S.font = $('font').value; S.weight = $('weight').value;
+  S.hel = num($('hel').value,0); S.kon = num($('kon').value,100);
+  S.auto = $('auto').checked; S.thr = num($('thr').value,128);
+  S.inv = $('inv').checked; S.bgrm = $('bgrm').checked;
+  S.clean = parseInt($('clean').value,10) || 0;
+  S.fit = $('fit').value; S.scl = num($('scl').value,100); S.pos = $('pos').value;
+  S.mirror = $('mirror').checked; S.flip = $('flip').checked;
+  S.ph = num($('ph').value,20); S.bt = num($('bt').value,3.5);
+  S.mt = num($('mt').value,1.5); S.mb = num($('mb').value,1.5);
+  S.sp = Math.round(num($('sp').value,101));
+  S.st = Math.round(num($('st').value,2));
+  S.fo = Math.round(num($('fo').value,180));
+  S.ms = num($('ms').value,4); S.mg = num($('mg').value,4);
+  S.rh = num($('rh').value,4.5); S.mk = $('mk').value;
+  $('helV').textContent = (S.hel>0?'+':'') + S.hel;
+  $('konV').textContent = (S.kon/100).toFixed(1).replace('.',',');
+  $('thrV').textContent = S.auto ? 'aus' : S.thr;
+  $('thr').disabled = S.auto;
+}
+var timer = null;
+function update(){
+  read();
+  clearTimeout(timer);
+  timer = setTimeout(function(){ compute(); draw(); stats(); table(); }, 70);
+}
+['txt','font','weight','hel','kon','auto','thr','inv','bgrm','clean','fit','mirror','flip',
+ 'scl','pos','ph','bt','mt','mb','sp','st','fo','ms','mg','rh','mk'].forEach(function(id){
+  var el = $(id);
+  el.addEventListener('input', update);
+  el.addEventListener('change', update);
+});
+
+function setMode(m){
+  S.mode = m;
+  $('mText').setAttribute('aria-pressed', m==='text');
+  $('mImg').setAttribute('aria-pressed', m==='image');
+  $('paneText').style.display = m==='text' ? '' : 'none';
+  $('paneImg').style.display  = m==='image' ? '' : 'none';
+  update();
+}
+$('mText').addEventListener('click', function(){ setMode('text'); });
+$('mImg').addEventListener('click', function(){ setMode('image'); });
+
+$('file').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  if (!f) return;
+  var fr = new FileReader();
+  fr.onload = function(){
+    var im = new Image();
+    im.onload = function(){ imgEl = im; setMode('image'); };
+    im.src = fr.result;
+  };
+  fr.readAsDataURL(f);
+});
+
+$('btnPat').addEventListener('click', printPattern);
+$('btnTab').addEventListener('click', printTable);
+$('btnCsv').addEventListener('click', csv);
+$('btnSave').addEventListener('click', function(){
+  try { localStorage.setItem('faltwerk3', JSON.stringify(S)); } catch(e){}
+});
+$('btnReset').addEventListener('click', function(){
+  try { localStorage.removeItem('faltwerk3'); } catch(e){}
+  location.reload();
+});
+
+(function boot(){
+  try {
+    var raw = localStorage.getItem('faltwerk3');
+    if (raw){
+      var o = JSON.parse(raw);
+      Object.keys(o).forEach(function(k){ if (k in S) S[k] = o[k]; });
+      $('txt').value=S.text; $('font').value=S.font; $('weight').value=S.weight;
+      $('hel').value=S.hel; $('kon').value=S.kon; $('auto').checked=S.auto; $('thr').value=S.thr;
+      $('inv').checked=S.inv; $('bgrm').checked=S.bgrm; $('clean').value=S.clean;
+      $('fit').value=S.fit; $('scl').value=S.scl; $('pos').value=S.pos;
+      $('mirror').checked=S.mirror; $('flip').checked=S.flip;
+      $('ph').value=S.ph; $('bt').value=S.bt; $('mt').value=S.mt; $('mb').value=S.mb;
+      $('sp').value=S.sp; $('st').value=S.st; $('fo').value=S.fo;
+      $('ms').value=S.ms; $('mg').value=S.mg; $('rh').value=S.rh; $('mk').value=S.mk;
+    }
+  } catch(e){}
+  update();
+})();
+
+(function manifest(){
+  var icon = 'data:image/svg+xml;base64,' + btoa(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
+    '<rect width="512" height="512" rx="96" fill="#12141a"/>' +
+    '<g fill="#f4f1e8"><rect x="96" y="112" width="48" height="288"/>' +
+    '<rect x="168" y="112" width="48" height="224"/><rect x="240" y="112" width="48" height="160"/>' +
+    '<rect x="312" y="112" width="48" height="224"/><rect x="384" y="112" width="32" height="288"/></g></svg>');
+  var m = { name:'FaltWerk', short_name:'FaltWerk', start_url:'.', display:'standalone',
+    background_color:'#12141a', theme_color:'#12141a',
+    icons:[{ src:icon, sizes:'512x512', type:'image/svg+xml', purpose:'any' }] };
+  var l = document.createElement('link');
+  l.rel = 'manifest';
+  l.href = URL.createObjectURL(new Blob([JSON.stringify(m)], {type:'application/json'}));
+  document.head.appendChild(l);
+  var al = document.createElement('link');
+  al.rel = 'apple-touch-icon'; al.href = icon;
+  document.head.appendChild(al);
+})();
+</script>
+</body>
+</html>
