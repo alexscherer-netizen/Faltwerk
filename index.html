@@ -81,21 +81,14 @@ footer.imp b{color:var(--tx)}
 .pp-page:last-child{page-break-after:auto;break-after:auto}
 .pp-head{font-size:9pt;border-bottom:.4mm solid #000;padding-bottom:1.5mm;margin-bottom:2mm;display:flex;justify-content:space-between;gap:6mm}
 .pp-head b{font-family:var(--disp)}
-.pp-ruler{position:relative;height:5mm;margin-left:13mm;border-bottom:.3mm solid #000}
-.pp-ruler i{position:absolute;bottom:0;width:.25mm;height:2mm;background:#000}
-.pp-ruler i.maj{height:4mm;width:.35mm}
-.pp-ruler u{position:absolute;bottom:4.2mm;font-size:6pt;text-decoration:none;transform:translateX(-50%);font-family:var(--mono)}
-.pp-row{display:flex;align-items:center}
-.pp-num{width:13mm;font-family:var(--mono);font-size:7.5pt;text-align:right;padding-right:2mm;flex:none}
-.pp-num.r{text-align:left;padding:0 0 0 2mm}
-.pp-track{position:relative;flex:none;border-bottom:.15mm solid #b9b9b9;overflow:hidden}
-.pp-bar{position:absolute;bottom:0;background:#000;display:block}
-.pp-tick{position:absolute;bottom:0;width:.4mm;background:#000;display:block}
+.pp-svg{display:block}
+#patPrev svg{max-width:100%;height:auto;background:#fff;border-radius:6px;border:1px solid var(--line)}
 .tbl-print{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:8pt;color:#000}
 .tbl-print th,.tbl-print td{border:.15mm solid #666;padding:.7mm 1.4mm;text-align:right}
 .tbl-print th{background:#eee}
 .tbl-cols{column-count:3;column-gap:6mm}
-@media print{ body{background:#fff} body>*{display:none !important} #printArea{display:block !important} }
+@media print{ body{background:#fff} body>*{display:none !important} #printArea{display:block !important}
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important} }
 </style>
 </head>
 <body>
@@ -194,6 +187,7 @@ footer.imp b{color:var(--tx)}
       </div>
       <div class="btns">
         <button class="pri" id="btnPat">Druckvorlage drucken</button>
+        <button id="btnPrev">Vorlage ansehen</button>
         <button id="btnTab">Ma&szlig;tabelle drucken</button>
         <button id="btnCsv">CSV speichern</button>
       </div>
@@ -233,6 +227,12 @@ footer.imp b{color:var(--tx)}
       <h2><span class="n">5</span> Ma&szlig;tabelle</h2>
       <p class="note">Werte in cm ab <b>Oberkante</b> der Buchseite. Zwischen Marke&nbsp;1&rarr;2 (und 3&rarr;4 &hellip;) wird gefaltet.</p>
       <div class="tblwrap"><table class="tbl" id="tbl"><thead></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card" id="prevCard" style="display:none">
+      <h2><span class="n">&#9634;</span> Druckvorschau &ndash; Blatt 1</h2>
+      <div id="patPrev"></div>
+      <p class="note">Genau das geht aufs Papier. Beim Drucken <b>Skalierung 100&nbsp;%</b> w&auml;hlen und mit dem Lineal oben gegenpr&uuml;fen.</p>
     </div>
 
     <details class="help">
@@ -625,43 +625,86 @@ function table(){
 }
 
 /* ================= Druck / Export ================= */
+// Vorlage als Inline-SVG: Fuellungen sind Inhalt, keine Hintergruende,
+// und werden daher unabhaengig von "Hintergrundgrafiken drucken" ausgegeben.
+function patternSVG(rows, pageNo, pages){
+  var U = 10;                       // 1 mm = 10 SVG-Einheiten
+  var lm = 13, rm = 13;             // Zahlenspalten links/rechts (mm)
+  var tw = S.ph*10;                 // Messstrecke (mm) = Seitenhoehe
+  var Wmm = lm + tw + rm;
+  var headH = 9, rulH = 7, rh = S.rh;
+  var Hmm = headH + rulH + rows.length*rh;
+  var s = '<svg class="pp-svg" xmlns="http://www.w3.org/2000/svg" width="' + Wmm + 'mm" height="' + Hmm + 'mm"'
+        + ' viewBox="0 0 ' + (Wmm*U) + ' ' + (Hmm*U) + '" font-family="Helvetica,Arial,sans-serif">';
+  s += '<rect x="0" y="0" width="' + (Wmm*U) + '" height="' + (Hmm*U) + '" fill="#ffffff"/>';
+
+  // Kopfzeile
+  s += '<text x="0" y="' + (4.6*U) + '" font-size="' + (3.1*U) + '" fill="#000">FaltWerk \u2013 Mess-Falt-Vorlage</text>';
+  s += '<text x="' + (Wmm*U) + '" y="' + (4.6*U) + '" font-size="' + (2.6*U) + '" fill="#000" text-anchor="end">'
+     + 'Seitenh\u00f6he ' + fmt(S.ph) + ' cm \u00b7 Marken ab Oberkante \u00b7 Blatt ' + pageNo + '/' + pages + '</text>';
+  s += '<rect x="0" y="' + (6*U) + '" width="' + (Wmm*U) + '" height="' + (0.4*U) + '" fill="#000"/>';
+
+  // Lineal, Grundlinie bei y = headH + rulH - 1
+  var ry = (headH + rulH - 1);
+  s += '<rect x="' + (lm*U) + '" y="' + (ry*U) + '" width="' + (tw*U) + '" height="' + (0.3*U) + '" fill="#000"/>';
+  var i, x;
+  for (i=0; i<=Math.round(S.ph*2); i++){
+    x = lm + i*5;
+    if (x > lm + tw + 0.01) break;
+    var maj = (i % 2 === 0);
+    var th = maj ? 3.4 : 1.8, tkw = maj ? 0.35 : 0.25;
+    s += '<rect x="' + ((x-tkw/2)*U) + '" y="' + ((ry-th)*U) + '" width="' + (tkw*U) + '" height="' + (th*U) + '" fill="#000"/>';
+    if (maj) s += '<text x="' + (x*U) + '" y="' + ((ry-3.9)*U) + '" font-size="' + (2.1*U) + '" fill="#000" text-anchor="middle">' + (i/2) + '</text>';
+  }
+
+  // Zeilen
+  var y0 = headH + rulH, fs = Math.max(2.1, Math.min(2.9, rh*0.62));
+  for (i=0; i<rows.length; i++){
+    var r = rows[i], top = y0 + i*rh, base = top + rh;
+    // cm-Hilfsraster
+    for (var c=0; c<=Math.floor(S.ph); c++){
+      var gx = lm + c*10;
+      if (gx > lm + tw + 0.01) break;
+      s += '<rect x="' + (gx*U) + '" y="' + (top*U) + '" width="' + (0.12*U) + '" height="' + (rh*U) + '" fill="'
+         + (c % 5 === 0 ? '#b0b0b0' : '#dcdcdc') + '"/>';
+    }
+    s += '<rect x="' + (lm*U) + '" y="' + ((base-0.15)*U) + '" width="' + (tw*U) + '" height="' + (0.15*U) + '" fill="#c8c8c8"/>';
+    s += '<text x="' + ((lm-2)*U) + '" y="' + ((base-rh*0.28)*U) + '" font-size="' + (fs*U) + '" fill="#000" text-anchor="end">' + r.page + '</text>';
+    s += '<text x="' + ((lm+tw+2)*U) + '" y="' + ((base-rh*0.28)*U) + '" font-size="' + (fs*U) + '" fill="#000">' + r.page + '</text>';
+    for (var j=0; j<r.segs.length; j++){
+      var a = lm + r.segs[j][0]*10, b = lm + r.segs[j][1]*10;
+      if (S.mk === 'tick'){
+        s += '<rect x="' + (a*U) + '" y="' + ((top+rh*0.12)*U) + '" width="' + (0.4*U) + '" height="' + (rh*0.76*U) + '" fill="#000"/>';
+        s += '<rect x="' + ((b-0.4)*U) + '" y="' + ((top+rh*0.12)*U) + '" width="' + (0.4*U) + '" height="' + (rh*0.76*U) + '" fill="#000"/>';
+        s += '<rect x="' + (a*U) + '" y="' + ((top+rh*0.48)*U) + '" width="' + ((b-a)*U) + '" height="' + (0.2*U) + '" fill="#000"/>';
+      } else {
+        s += '<rect x="' + (a*U) + '" y="' + ((top+rh*0.14)*U) + '" width="' + ((b-a)*U) + '" height="' + (rh*0.72*U) + '" fill="#000"/>';
+      }
+    }
+  }
+  return s + '</svg>';
+}
+
+function patternPages(){
+  var perPage = Math.max(5, Math.floor((194 - 16 - 9 - 7)/S.rh));
+  var pages = Math.ceil(RESULT.length/perPage), out = [], p;
+  for (p=0; p<pages; p++)
+    out.push(patternSVG(RESULT.slice(p*perPage, (p+1)*perPage), p+1, pages));
+  return out;
+}
+
 function printPattern(){
   if (!RESULT.length) return;
-  var mm = S.ph*10, rh = S.rh;
-  var perPage = Math.max(5, Math.floor(176/rh));
-  var pages = Math.ceil(RESULT.length/perPage), html = '', p, i;
-  var ruler = '<div class="pp-ruler" style="width:' + mm + 'mm">';
-  for (i=0;i<=Math.floor(S.ph*2);i++){
-    var pos = i*5, maj = (i%2===0);
-    ruler += '<i class="' + (maj?'maj':'') + '" style="left:' + pos + 'mm"></i>';
-    if (maj) ruler += '<u style="left:' + pos + 'mm">' + (i/2) + '</u>';
-  }
-  ruler += '</div>';
-  for (p=0;p<pages;p++){
-    var head = '<div class="pp-head"><span><b>FaltWerk</b> \u00b7 Mess-Falt-Vorlage</span>' +
-      '<span>Seitenh\u00f6he ' + fmt(S.ph) + ' cm \u00b7 Marken ab Oberkante</span>' +
-      '<span>Blatt ' + (p+1) + '/' + pages + '</span></div>';
-    var rows = '';
-    for (i=p*perPage;i<Math.min(RESULT.length,(p+1)*perPage);i++){
-      var r = RESULT[i], bars = '';
-      for (var j=0;j<r.segs.length;j++){
-        var a = r.segs[j][0]*10, b = r.segs[j][1]*10;
-        if (S.mk === 'tick'){
-          bars += '<i class="pp-tick" style="left:' + a + 'mm;height:' + (rh*0.8) + 'mm"></i>';
-          bars += '<i class="pp-tick" style="left:' + (b-0.4) + 'mm;height:' + (rh*0.8) + 'mm"></i>';
-          bars += '<i class="pp-bar" style="left:' + a + 'mm;width:' + (b-a) + 'mm;height:.2mm"></i>';
-        } else {
-          bars += '<i class="pp-bar" style="left:' + a + 'mm;width:' + (b-a) + 'mm;height:' + (rh*0.72) + 'mm"></i>';
-        }
-      }
-      rows += '<div class="pp-row" style="height:' + rh + 'mm">' +
-        '<span class="pp-num">' + r.page + '</span>' +
-        '<div class="pp-track" style="width:' + mm + 'mm;height:' + rh + 'mm">' + bars + '</div>' +
-        '<span class="pp-num r">' + r.page + '</span></div>';
-    }
-    html += '<div class="pp-page">' + head + ruler + rows + '</div>';
-  }
-  doPrint(html, 'A4 landscape');
+  var pages = patternPages().map(function(svg){ return '<div class="pp-page">' + svg + '</div>'; });
+  doPrint(pages.join(''), 'A4 landscape');
+}
+
+function previewPattern(){
+  var box = $('patPrev');
+  if (!RESULT.length){ box.innerHTML = '<p class="note">Kein Motiv \u2013 nichts zu drucken.</p>'; }
+  else { box.innerHTML = patternPages()[0]; }
+  $('prevCard').style.display = '';
+  $('prevCard').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function printTable(){
@@ -774,6 +817,7 @@ $('file').addEventListener('change', function(e){
 });
 
 $('btnPat').addEventListener('click', printPattern);
+$('btnPrev').addEventListener('click', previewPattern);
 $('btnTab').addEventListener('click', printTable);
 $('btnCsv').addEventListener('click', csv);
 $('btnSave').addEventListener('click', function(){
