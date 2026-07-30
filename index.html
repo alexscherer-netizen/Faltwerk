@@ -82,7 +82,11 @@ footer.imp b{color:var(--tx)}
 .pp-head{font-size:9pt;border-bottom:.4mm solid #000;padding-bottom:1.5mm;margin-bottom:2mm;display:flex;justify-content:space-between;gap:6mm}
 .pp-head b{font-family:var(--disp)}
 .pp-svg{display:block}
-#patPrev svg{max-width:100%;height:auto;background:#fff;border-radius:6px;border:1px solid var(--line)}
+#patPrev{overflow:auto;background:#0d0f14;border:1px solid var(--line);border-radius:8px;padding:10px}
+#patPrev svg{width:640px;max-width:none;height:auto;background:#fff;border-radius:4px}
+.prevbar{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.prevbar button{padding:4px 12px}
+.mono{font-family:var(--mono);font-size:13px;color:var(--mut)}
 .tbl-print{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:8pt;color:#000}
 .tbl-print th,.tbl-print td{border:.15mm solid #666;padding:.7mm 1.4mm;text-align:right}
 .tbl-print th{background:#eee}
@@ -230,7 +234,10 @@ footer.imp b{color:var(--tx)}
     </div>
 
     <div class="card" id="prevCard" style="display:none">
-      <h2><span class="n">&#9634;</span> Druckvorschau &ndash; Blatt 1</h2>
+      <h2><span class="n">&#9634;</span> Druckvorschau</h2>
+      <div class="prevbar">
+        <button id="prevBack">&larr;</button><span id="prevNav" class="mono"></span><button id="prevFwd">&rarr;</button>
+      </div>
       <div id="patPrev"></div>
       <p class="note">Genau das geht aufs Papier. Beim Drucken <b>Skalierung 100&nbsp;%</b> w&auml;hlen und mit dem Lineal oben gegenpr&uuml;fen.</p>
     </div>
@@ -627,58 +634,87 @@ function table(){
 /* ================= Druck / Export ================= */
 // Vorlage als Inline-SVG: Fuellungen sind Inhalt, keine Hintergruende,
 // und werden daher unabhaengig von "Hintergrundgrafiken drucken" ausgegeben.
-function patternSVG(rows, pageNo, pages){
-  var U = 10;                       // 1 mm = 10 SVG-Einheiten
-  var lm = 13, rm = 13;             // Zahlenspalten links/rechts (mm)
-  var tw = S.ph*10;                 // Messstrecke (mm) = Seitenhoehe
-  var Wmm = lm + tw + rm;
-  var headH = 9, rulH = 7, rh = S.rh;
+var U = 10;                                   // 1 mm = 10 SVG-Einheiten
+function rct(x,y,w,h,f){
+  return '<rect x="' + (x*U).toFixed(1) + '" y="' + (y*U).toFixed(1) +
+         '" width="' + Math.max(w*U,0.8).toFixed(1) + '" height="' + Math.max(h*U,0.8).toFixed(1) +
+         '" fill="' + f + '"/>';
+}
+function txt(x,y,size,anchor,t){
+  return '<text x="' + (x*U).toFixed(1) + '" y="' + (y*U).toFixed(1) + '" font-size="' + (size*U).toFixed(1) +
+         '" fill="#000" text-anchor="' + anchor + '">' + t + '</text>';
+}
+
+// Uebersichtsstreifen: ganzes Motiv, aktueller Blattbereich markiert
+function locator(startIdx, count, x, y, w, h){
+  var s = rct(x, y, w, h, '#ffffff');
+  s += rct(x, y, w, 0.2, '#888888') + rct(x, y+h-0.2, w, 0.2, '#888888');
+  s += rct(x, y, 0.2, h, '#888888') + rct(x+w-0.2, y, 0.2, h, '#888888');
+  // gleiche Achsen wie das Blatt: quer = Messstrecke, laengs = Faltungen
+  var n = RESULT.length || 1;
+  var step = Math.max(1, Math.ceil(n/220));
+  var fh = Math.max(h/n*step, 0.12);
+  for (var f=0; f<n; f+=step){
+    var fy = y + (f/n)*h;
+    for (var j=0; j<RESULT[f].segs.length; j++){
+      var a = RESULT[f].segs[j][0], b = RESULT[f].segs[j][1];
+      s += rct(x + (a/S.ph)*w, fy, ((b-a)/S.ph)*w, fh, '#000000');
+    }
+  }
+  var ay = y + (startIdx/n)*h, ah = Math.max((count/n)*h, 0.5);
+  s += rct(x-1.4, ay, 0.7, ah, '#000000');
+  s += rct(x+w+0.7, ay, 0.7, ah, '#000000');
+  return s;
+}
+
+function patternSVG(rows, startIdx, pageNo, pages){
+  var lm = 12, rm = 12, tw = S.ph*10, Wmm = lm + tw + rm;   // 12+255+12 = 279 mm passt noch auf A4 quer
+  var headH = 13, rulH = 7, rh = S.rh;
   var Hmm = headH + rulH + rows.length*rh;
   var s = '<svg class="pp-svg" xmlns="http://www.w3.org/2000/svg" width="' + Wmm + 'mm" height="' + Hmm + 'mm"'
         + ' viewBox="0 0 ' + (Wmm*U) + ' ' + (Hmm*U) + '" font-family="Helvetica,Arial,sans-serif">';
-  s += '<rect x="0" y="0" width="' + (Wmm*U) + '" height="' + (Hmm*U) + '" fill="#ffffff"/>';
+  s += rct(0, 0, Wmm, Hmm, '#ffffff');
 
-  // Kopfzeile
-  s += '<text x="0" y="' + (4.6*U) + '" font-size="' + (3.1*U) + '" fill="#000">FaltWerk \u2013 Mess-Falt-Vorlage</text>';
-  s += '<text x="' + (Wmm*U) + '" y="' + (4.6*U) + '" font-size="' + (2.6*U) + '" fill="#000" text-anchor="end">'
-     + 'Seitenh\u00f6he ' + fmt(S.ph) + ' cm \u00b7 Marken ab Oberkante \u00b7 Blatt ' + pageNo + '/' + pages + '</text>';
-  s += '<rect x="0" y="' + (6*U) + '" width="' + (Wmm*U) + '" height="' + (0.4*U) + '" fill="#000"/>';
+  s += txt(0, 4.2, 3.0, 'start', 'FaltWerk \u2013 Mess-Falt-Vorlage');
+  s += txt(0, 8.6, 2.3, 'start', 'Seitenh\u00f6he ' + fmt(S.ph) + ' cm \u00b7 alle Marken in cm ab der Oberkante \u00b7 Blatt ' + pageNo + ' von ' + pages);
+  s += txt(0, 11.8, 2.3, 'start', 'Faltung ' + (startIdx+1) + '\u2013' + (startIdx+rows.length) + ' von ' + RESULT.length);
+  s += locator(startIdx, rows.length, Wmm-64, 1.8, 62, 9.0);
+  s += rct(0, headH-1.2, Wmm, 0.4, '#000000');
 
-  // Lineal, Grundlinie bei y = headH + rulH - 1
-  var ry = (headH + rulH - 1);
-  s += '<rect x="' + (lm*U) + '" y="' + (ry*U) + '" width="' + (tw*U) + '" height="' + (0.3*U) + '" fill="#000"/>';
-  var i, x;
-  for (i=0; i<=Math.round(S.ph*2); i++){
-    x = lm + i*5;
+  // Lineal
+  var ry = headH + rulH - 1;
+  s += rct(lm, ry, tw, 0.3, '#000000');
+  for (var i=0; i<=Math.round(S.ph*2); i++){
+    var x = lm + i*5;
     if (x > lm + tw + 0.01) break;
-    var maj = (i % 2 === 0);
-    var th = maj ? 3.4 : 1.8, tkw = maj ? 0.35 : 0.25;
-    s += '<rect x="' + ((x-tkw/2)*U) + '" y="' + ((ry-th)*U) + '" width="' + (tkw*U) + '" height="' + (th*U) + '" fill="#000"/>';
-    if (maj) s += '<text x="' + (x*U) + '" y="' + ((ry-3.9)*U) + '" font-size="' + (2.1*U) + '" fill="#000" text-anchor="middle">' + (i/2) + '</text>';
+    var maj = (i % 2 === 0), th = maj ? 3.4 : 1.8, tkw = maj ? 0.35 : 0.25;
+    s += rct(x-tkw/2, ry-th, tkw, th, '#000000');
+    if (maj) s += txt(x, ry-3.9, 2.1, 'middle', String(i/2));
   }
+  s += txt(lm-2, ry, 2.2, 'end', 'OBEN');
+  s += txt(lm+tw+2, ry, 2.2, 'start', 'UNTEN');
 
   // Zeilen
   var y0 = headH + rulH, fs = Math.max(2.1, Math.min(2.9, rh*0.62));
   for (i=0; i<rows.length; i++){
-    var r = rows[i], top = y0 + i*rh, base = top + rh;
-    // cm-Hilfsraster
+    var r = rows[i], gi = startIdx + i, top = y0 + i*rh, base = top + rh;
+    if (Math.floor(gi/5) % 2 === 0) s += rct(lm, top, tw, rh, '#f0f0f0');
     for (var c=0; c<=Math.floor(S.ph); c++){
       var gx = lm + c*10;
       if (gx > lm + tw + 0.01) break;
-      s += '<rect x="' + (gx*U) + '" y="' + (top*U) + '" width="' + (0.12*U) + '" height="' + (rh*U) + '" fill="'
-         + (c % 5 === 0 ? '#b0b0b0' : '#dcdcdc') + '"/>';
+      s += rct(gx, top, 0.12, rh, (c % 5 === 0) ? '#a8a8a8' : '#d8d8d8');
     }
-    s += '<rect x="' + (lm*U) + '" y="' + ((base-0.15)*U) + '" width="' + (tw*U) + '" height="' + (0.15*U) + '" fill="#c8c8c8"/>';
-    s += '<text x="' + ((lm-2)*U) + '" y="' + ((base-rh*0.28)*U) + '" font-size="' + (fs*U) + '" fill="#000" text-anchor="end">' + r.page + '</text>';
-    s += '<text x="' + ((lm+tw+2)*U) + '" y="' + ((base-rh*0.28)*U) + '" font-size="' + (fs*U) + '" fill="#000">' + r.page + '</text>';
+    s += rct(lm, base-0.15, tw, 0.15, (gi+1) % 10 === 0 ? '#707070' : '#c8c8c8');
+    s += txt(lm-2, base-rh*0.28, fs, 'end', String(r.page));
+    s += txt(lm+tw+2, base-rh*0.28, fs, 'start', String(r.page));
     for (var j=0; j<r.segs.length; j++){
       var a = lm + r.segs[j][0]*10, b = lm + r.segs[j][1]*10;
       if (S.mk === 'tick'){
-        s += '<rect x="' + (a*U) + '" y="' + ((top+rh*0.12)*U) + '" width="' + (0.4*U) + '" height="' + (rh*0.76*U) + '" fill="#000"/>';
-        s += '<rect x="' + ((b-0.4)*U) + '" y="' + ((top+rh*0.12)*U) + '" width="' + (0.4*U) + '" height="' + (rh*0.76*U) + '" fill="#000"/>';
-        s += '<rect x="' + (a*U) + '" y="' + ((top+rh*0.48)*U) + '" width="' + ((b-a)*U) + '" height="' + (0.2*U) + '" fill="#000"/>';
+        s += rct(a, top+rh*0.12, 0.4, rh*0.76, '#000000');
+        s += rct(b-0.4, top+rh*0.12, 0.4, rh*0.76, '#000000');
+        s += rct(a, top+rh*0.48, b-a, 0.2, '#000000');
       } else {
-        s += '<rect x="' + (a*U) + '" y="' + ((top+rh*0.14)*U) + '" width="' + ((b-a)*U) + '" height="' + (rh*0.72*U) + '" fill="#000"/>';
+        s += rct(a, top+rh*0.14, b-a, rh*0.72, '#000000');
       }
     }
   }
@@ -686,10 +722,10 @@ function patternSVG(rows, pageNo, pages){
 }
 
 function patternPages(){
-  var perPage = Math.max(5, Math.floor((194 - 16 - 9 - 7)/S.rh));
+  var perPage = Math.max(5, Math.floor((188 - 13 - 7)/S.rh));   // 6 mm Reserve gegen Umbruch-Rundung
   var pages = Math.ceil(RESULT.length/perPage), out = [], p;
   for (p=0; p<pages; p++)
-    out.push(patternSVG(RESULT.slice(p*perPage, (p+1)*perPage), p+1, pages));
+    out.push(patternSVG(RESULT.slice(p*perPage, (p+1)*perPage), p*perPage, p+1, pages));
   return out;
 }
 
@@ -699,12 +735,20 @@ function printPattern(){
   doPrint(pages.join(''), 'A4 landscape');
 }
 
+var PREVPG = 0;
 function previewPattern(){
-  var box = $('patPrev');
-  if (!RESULT.length){ box.innerHTML = '<p class="note">Kein Motiv \u2013 nichts zu drucken.</p>'; }
-  else { box.innerHTML = patternPages()[0]; }
   $('prevCard').style.display = '';
+  renderPrev();
   $('prevCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function renderPrev(){
+  var box = $('patPrev');
+  if (!RESULT.length){ box.innerHTML = '<p class="note">Kein Motiv \u2013 nichts zu drucken.</p>'; $('prevNav').textContent=''; return; }
+  var pg = patternPages();
+  if (PREVPG >= pg.length) PREVPG = 0;
+  if (PREVPG < 0) PREVPG = pg.length-1;
+  box.innerHTML = pg[PREVPG];
+  $('prevNav').textContent = 'Blatt ' + (PREVPG+1) + ' von ' + pg.length;
 }
 
 function printTable(){
@@ -818,6 +862,8 @@ $('file').addEventListener('change', function(e){
 
 $('btnPat').addEventListener('click', printPattern);
 $('btnPrev').addEventListener('click', previewPattern);
+$('prevBack').addEventListener('click', function(){ PREVPG--; renderPrev(); });
+$('prevFwd').addEventListener('click', function(){ PREVPG++; renderPrev(); });
 $('btnTab').addEventListener('click', printTable);
 $('btnCsv').addEventListener('click', csv);
 $('btnSave').addEventListener('click', function(){
